@@ -1,0 +1,325 @@
+---
+title: "Patent Visualization Systen"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(leaflet)
+library(DT)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(forcats)
+library(scales)
+library(stringr)
+library(treemap)
+library(d3treeR)
+library(data.table)
+library(wordcloud)
+library(tidytext)
+library(leaflet.extras)
+```
+
+```{r build_date}
+combined <- readRDS("IN_patent_data_combined.RDS")
+
+```
+
+
+Map View
+=====================================
+
+```{r}
+m <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addResetMapButton() %>%
+  addMarkers( 
+                lat = as.numeric(combined$assignee_latitude),
+                lng = as.numeric(combined$assignee_longitude),
+                clusterOptions = markerClusterOptions(),
+                group = 'patents',
+                popup = paste(
+                  "<b>Patent Number:</b>", combined$patent_number,"<br />",
+                  "<b>Patent Title:</b>", combined$patent_title,"<br />",
+                  "<b>Patent Year:</b>", combined$patent_year,"<br />",
+                  "<b>Application Date:</b>", combined$app_date, "<br />",
+                  "<b>Patent Grant Date:</b>", combined$patent_date, "<br />",
+                  "<b>Organization:</b>", combined$assignee_organization,"<br />",
+                  "<b>Category</b>", combined$nber_subcategory_title, "<br />",
+                  "<b>Inventor Name:</b>", paste(combined$inventor_first_name,
+                                          combined$inventor_last_name),"<br />",
+                  "<b>Location:</b>", paste0(combined$assignee_city,", ",
+                                             combined$assignee_state),"<br />",
+                  "<b>Abstract</b>", paste0(str_sub(combined$patent_abstract, 1, 100),"..."),"<br />",
+                  "<b>External Links:</b><br />",
+                  "&nbsp;&nbsp;&nbsp;&nbsp;",
+                  paste0("<a href='",file.path('http://www.patentsview.org/web/#detail/patent',combined$patent_number), "'> PatentView</a><br />"),
+                  "&nbsp;&nbsp;&nbsp;&nbsp;",
+                  paste0("<a href='https://patents.google.com/patent/US",combined$patent_number,"'> Google Patents</a><br />")
+                ) 
+                  
+      ) 
+
+m
+```
+
+
+Tabular View
+=====================================
+
+```{r}
+datatable(combined %>%
+  mutate(google_link = paste0("https://patents.google.com/patent/US",patent_number)) %>%
+  select(patent_number, 
+         patent_title, 
+         patent_year, 
+         app_date,
+         patent_date,
+         assignee_organization,
+         uspc_mainclass_title,
+         assignee_city,
+         inventor_last_name, 
+         inventor_first_name,
+         patent_num_cited_by_us_patents,
+         google_link),
+          filter = 'top',
+          class = 'cell-border stripe',
+          rownames = FALSE,
+          colnames = c("Patent Number",
+                       "Patent Title",
+                       "Patent Granted Year",
+                       "App Date",
+                       "Patent Grant Date",
+                       "Organization",
+                       "Category",
+                       "City",
+                       "Last Name",
+                       "First Name",
+                       "# of Times Cited",
+                       "Google Patents")
+          )
+```
+
+Overview of Indiana Patents
+=====================================
+
+Row {.tabset}
+-------------------------------------
+
+### Distribution by Year Granted
+
+```{r fig.width = 12}
+g <- combined %>%
+  mutate(year_granted = as.integer(patent_year)) %>% 
+  dplyr::group_by(year_granted) %>%
+  dplyr::summarise(count = n()) %>%
+  ggplot(aes(x = year_granted, y = count)) +
+  geom_bar(stat = 'identity', fill = '#000f5d') +
+  scale_y_continuous(label = comma) +
+  labs(x = "Year of Patent Grant", y = "# of Patents", title ="")
+
+ggplotly(g, tooltip = c('x', 'y'))
+
+```
+
+### Distribution by NBER Category
+
+```{r fig.width = 12}
+combined %>%
+  dplyr::group_by(nber_subcategory_title) %>%
+  dplyr::summarise(ct = n()) %>%
+  dplyr::mutate(freq = ct / sum(ct)) %>%
+  ggplot(aes(x = fct_reorder(nber_subcategory_title, freq), y = freq)) +
+    geom_bar(stat = 'identity', fill = '#000f5d') +
+    geom_text(aes(label = freq %>% percent), nudge_y = 0.01) +
+    labs(x = "NBER Subcategory Title", y = "% of Patents", title ="") +
+    coord_flip() +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks = element_blank()
+    )
+
+
+```
+
+### Time Between Application and Grant
+
+```{r fig.width = 12}
+g <-combined %>%
+  dplyr::mutate(time_to_grant = as.Date(patent_date)-as.Date(app_date)) %>%
+  dplyr::filter(time_to_grant >= 0) %>%
+  dplyr::group_by(time_to_grant) %>%
+  summarize(cnt = n()) %>%
+  dplyr::arrange(time_to_grant) %>%
+  dplyr::mutate(pct = cumsum(cnt / sum(cnt)) %>% round(2)) %>% 
+  ggplot(aes(x = time_to_grant, y = pct)) +
+  geom_line(color = "#000f5d", group = 1) +
+  labs(x = "Time From Application to Grant (Days)", y = "Cumulative % of Patents", title ="") +
+  scale_x_continuous(label = comma) +
+  scale_y_continuous(label = percent) +
+  coord_cartesian(xlim = c(0, 365*10))
+
+
+ggplotly(g)
+
+
+```
+
+### Distribution by Number of Times Cited
+
+```{r fig.width = 12}
+g <-combined %>%
+  dplyr::group_by(patent_num_cited_by_us_patents) %>%
+  summarize(cnt = n()) %>%
+  dplyr::arrange(patent_num_cited_by_us_patents) %>%
+  dplyr::mutate(pct = cumsum(cnt / sum(cnt)) %>% round(2)) %>% 
+  ggplot(aes(x = patent_num_cited_by_us_patents, y = pct)) +
+  geom_line(color = "#000f5d", group = 1) +
+  labs(x = "Number of Times Cited By Other Patents", y = "Cumulative % of Patents", title ="") +
+  scale_x_continuous(label = comma) +
+  scale_y_continuous(label = percent) +
+  coord_cartesian(xlim = c(0, 500))
+
+
+ggplotly(g)
+
+```
+
+Breakdown by CPC Segment
+=====================================
+
+Row
+-------------------------------------
+
+```{r echo=FALSE, fig.width=12, fig.height=6}
+combined <- data.table(combined)
+combined[cpc_section_id == "A", cpc_section_title := "Human Necessities"]
+combined[cpc_section_id == "B", cpc_section_title := "Operations and Transport"]
+combined[cpc_section_id == "C", cpc_section_title := "Chemistry and Metallurgy"]
+combined[cpc_section_id == "D", cpc_section_title := "Textiles"]
+combined[cpc_section_id == "E", cpc_section_title := "Fixed Constructions"]
+combined[cpc_section_id == "F", cpc_section_title := "Mechanical Engineering"]
+combined[cpc_section_id == "G", cpc_section_title := "Physics"]
+combined[cpc_section_id == "H", cpc_section_title := "Electricity"]
+
+tmap <- combined[!is.na(cpc_section_title), .(value = .N) , by = .(cpc_section_title,
+                                          cpc_subsection_title,
+                                          cpc_group_title
+                                          )]
+
+tmap[, section_sum := sum(value), by = cpc_section_title]
+tmap[, subsection_sum := sum(value), by = .(cpc_section_title, 
+                                            cpc_subsection_title)]
+tmap[, group_sum := sum(value), by = .(cpc_section_title, 
+                                       cpc_subsection_title, 
+                                       cpc_group_title)]
+
+library(scales)
+library(magrittr)
+library(stringr)
+tmap[, section := str_wrap(paste(cpc_section_title, section_sum %>% comma), 100)]
+tmap[, subsection := str_wrap(paste(cpc_subsection_title, subsection_sum %>% comma), 100)]
+tmap[, group := str_wrap(paste(cpc_group_title, group_sum %>% comma), 100)]
+
+
+tm <- treemap(
+  tmap,
+  index = c("section",
+            "subsection",
+            "group"
+            ),  
+  vSize = 'value',
+  draw=TRUE,
+  title="COOPERATIVE PATENT CLASSIFICATION"
+  )
+
+#pdf(NULL)
+#d3tree3( tm , rootname = "COOPERATIVE PATENT CLASSIFICATION" )
+```
+
+
+
+Text-Mining Patent Abstracts
+=====================================
+
+Row {.tabset}
+-------------------------------------
+
+### 1970s
+
+```{r}
+
+txt <- combined %>%
+  mutate(decade = floor(patent_year / 10)*10) %>%
+  select(decade, patent_abstract) %>%
+  unnest_tokens(word, patent_abstract) %>%
+  filter(!str_detect(word, '[^a-z]')) %>%
+  filter(str_length(word) > 1) %>%
+  anti_join(get_stopwords()) %>%
+  #mutate(word = SnowballC::wordStem(word)) %>%
+  group_by(decade, word) %>%
+  summarise(cnt = n()) %>%
+  bind_tf_idf(word, decade, cnt) %>%
+  arrange(decade, desc(tf_idf)) %>%
+  #filter(row_number() <= 15) %>%
+  ungroup()
+
+txt %>%
+  filter(decade == 1970) %>%
+  select(word, tf_idf) %>%
+  rename(freq = tf_idf) %>%
+  with(wordcloud(word, freq, random.order = F, colors=brewer.pal(8, "Dark2"), max.words = 100))
+
+
+```
+
+
+### 1980s
+
+```{r}
+txt %>%
+  filter(decade == 1980) %>%
+  select(word, tf_idf) %>%
+  rename(freq = tf_idf) %>%
+  with(wordcloud(word, freq, random.order = F, colors=brewer.pal(8, "Dark2"), max.words = 100))
+
+```
+
+
+### 1990s
+
+```{r}
+txt %>%
+  filter(decade == 1990) %>%
+  select(word, tf_idf) %>%
+  rename(freq = tf_idf) %>%
+  with(wordcloud(word, freq, random.order = F, colors=brewer.pal(8, "Dark2"), max.words = 100))
+
+```
+
+### 2000s
+
+```{r}
+txt %>%
+  filter(decade == 2000) %>%
+  select(word, tf_idf) %>%
+  rename(freq = tf_idf) %>%
+  with(wordcloud(word, freq, random.order = F, colors=brewer.pal(8, "Dark2"), max.words = 100))
+
+```
+
+### 2010s
+
+```{r}
+txt %>%
+  filter(decade == 2010) %>%
+  select(word, tf_idf) %>%
+  rename(freq = tf_idf) %>%
+  with(wordcloud(word, freq, random.order = F, colors=brewer.pal(8, "Dark2"), max.words = 100))
+
+```
+
