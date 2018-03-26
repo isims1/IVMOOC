@@ -112,7 +112,7 @@ Network_Vis <- function(combined = IN_patent_data_combined, unnested = IN_patent
   } 
 
   #produce visualization
-  plot <- visNetwork(nodes, edges, main = paste0("Top ", top_num, " Most Cited Indiana Patents with Assignees and Inventors"), width = "100%") %>%
+  plot <- visNetwork(nodes, edges, main = paste0("Top ", top_num, " Most Cited Indiana Patents with ", included), width = "100%") %>%
             addFontAwesome() %>%
             visInteraction(navigationButtons = TRUE) %>%
             visLegend(addNodes = legend,
