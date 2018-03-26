@@ -5,7 +5,8 @@ shinyUI(
     dashboardSidebar(
       sidebarMenu(id="tabs",
         menuItem("Table View", tabName = "table_view", icon = icon("table")),
-        menuItem("Network Vis", tabName = "network_vis", icon = icon("sitemap"))
+        menuItem("Network Vis", tabName = "network_vis", icon = icon("sitemap")),
+        menuItem("Pull New Data", tabName = "pull_data", icon = icon("database"))
       )
     ),
     dashboardBody(
@@ -64,7 +65,24 @@ shinyUI(
             div(style="float:right", downloadButton("download_network_data", "Download Data")),
             br()
           )
-        )
+        ),
+        tabItem(tabName = "pull_data",
+          fluidRow(
+            column(12,
+              helpText("Click below to pull new data (this can take a while). A notification will display when it is done."),
+              actionButton("pull_new_data", "Update Data"),
+              br(),
+              br(),
+              textOutput("upload_status"),
+              br(),
+              helpText("Last time data was updated:"),
+              textOutput("upload_date"),
+              br(),
+              br(),
+              br()
+            )
+          )
+        )  
       )
     )
   )

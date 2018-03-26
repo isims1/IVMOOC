@@ -29,4 +29,12 @@ shinyServer(function(input, output, session) {
     }
   )
   
+  data_pull_msg <- eventReactive(input$pull_new_data, {
+    Pull_Data()
+  })
+  
+  output$upload_status <- renderText({data_pull_msg()})
+  output$upload_date <- renderText({as.character(data_last_update)})
+  
+  
 })
