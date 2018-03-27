@@ -6,7 +6,8 @@ shinyUI(
       sidebarMenu(id="tabs",
         menuItem("Table View", tabName = "table_view", icon = icon("table")),
         menuItem("Network Vis", tabName = "network_vis", icon = icon("sitemap")),
-        menuItem("Pull New Data", tabName = "pull_data", icon = icon("database"))
+        menuItem("Pull New Data", tabName = "pull_data", icon = icon("database")),
+        menuItem("Investors/Assignees", tabName="inv_assn", icon = icon("adjust"))
       )
     ),
     dashboardBody(
@@ -82,7 +83,20 @@ shinyUI(
               br()
             )
           )
-        )  
+        ),
+        tabItem(tabName ="inv_assn",
+          fluidRow(
+            column(12,
+              sliderInput("patent_year", "Year", min = 1976,
+                max = 2017, value = 2017, sep = "", step = 1),
+              selectInput("category", "Patent Category",
+                choices = c("Other"), selected="Other"),
+              plotOutput("polar_chart"),
+              span(textOutput("inventor_text"), style="size:14"),
+              span(textOutput("assignee_text"), style="size:14")
+            )
+          )
+        )
       )
     )
   )
