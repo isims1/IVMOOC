@@ -5,6 +5,7 @@ shinyUI(
     dashboardSidebar(
       sidebarMenu(id="tabs",
         menuItem("Table View", tabName = "table_view", icon = icon("table")),
+        menuItem("Map Vis", tabName = "map_vis", icon = icon("map")),
         menuItem("Network Vis", tabName = "network_vis", icon = icon("sitemap")),
         menuItem("Pull New Data", tabName = "pull_data", icon = icon("database"))
       )
@@ -26,6 +27,39 @@ shinyUI(
           br(),
           div(style="float:right", downloadButton("download_all_data", "Download Data")),
           br()
+        ),
+        tabItem(tabName = "map_vis",
+          fluidRow(
+            column(1
+            ),
+            column(9,
+               selectInput("map_select_patent_year", label = "Select Patent Year(s):",
+                  choices = sort(unique(IN_patent_data_combined$patent_year),decreasing = TRUE),
+                  multiple = TRUE,
+                  selected = c(max(IN_patent_data_combined$patent_year),max(IN_patent_data_combined$patent_year)-1),
+                  width = "100%"
+              )
+            ),
+            column(2,
+              radioButtons("map_plot_or_data", "Plot or Data",
+                          c("Plot" = "map_pickedPlot", "Data" = "map_pickedData" ),
+                          selected = "map_pickedPlot",
+                          inline = T
+              )
+            )
+          ),
+          br(),
+          conditionalPanel(
+            condition = "input.map_plot_or_data=='map_pickedPlot'",
+            leafletOutput("map_vis_plot", width = "100%", height = "850px")
+          ),
+          conditionalPanel(
+            condition = "input.map_plot_or_data=='map_pickedData'",
+            dataTableOutput("map_data"),
+            br(),
+            div(style="float:right", downloadButton("download_map_data", "Download Data")),
+            br()
+          )
         ),
         tabItem(tabName = "network_vis",
           fluidRow(
