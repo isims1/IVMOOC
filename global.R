@@ -1,4 +1,6 @@
 library(shiny)
+library(data.table)
+library(ggplot2)
 library(dplyr)
 library(patentsview)
 library(purrr)
@@ -9,6 +11,7 @@ library(shinydashboard)
 source("Func_View_All_Data.R")
 source("Func_Network_Vis.R")
 source("Func_Pull_Data.R")
+source("Func_Vis_Circular.R")
 
 #load data
 IN_patent_data_combined <- readRDS("IN_patent_data_combined.RDS")
