@@ -1,10 +1,35 @@
 shinyServer(function(input, output, session) {
   
+  # Circular Vis Tab
+  Circular_Vis_Func <- reactive({
+    Circular_Vis(select_year = input$patent_year, select_section = input$category)
+  })
+  
+  output$polar_chart <- renderPlot({
+    Circular_Vis_Func()$vis
+  })
+  
+  output$inventor_text <- renderText({
+    paste("Number of Inventors: ", Circular_Vis_Func()$selected$inv_count)
+  })
+  
+  output$assignee_text <- renderText({
+    paste("Number of Assignees: ", Circular_Vis_Func()$selected$assn_count)
+  })
+  
+  observe({
+    updateSliderInput(session, "patent_year",
+      min = min(Circular_Vis_Func()$data$year_granted), 
+      max = max(Circular_Vis_Func()$data$year_granted))
+  
+    updateSelectInput(session, "category",
+      choices = Circular_Vis_Func()$data$cpc_section_title)
+  })
+  
   #View all data tab
   View_All_Data_Func <- reactive({
     View_All_Data(fields = input$selected_field_list)
   })
-  
  
   output$table_of_all_data <- renderDataTable({View_All_Data_Func()},options=list(pageLength=10, scrollX=TRUE))
   output$download_all_data <- downloadHandler(
@@ -35,6 +60,5 @@ shinyServer(function(input, output, session) {
   
   output$upload_status <- renderText({data_pull_msg()})
   output$upload_date <- renderText({as.character(data_last_update)})
-  
   
 })
