@@ -31,7 +31,8 @@ shinyServer(function(input, output, session) {
     View_All_Data(fields = input$selected_field_list)
   })
  
-  output$table_of_all_data <- renderDataTable({View_All_Data_Func()},options=list(pageLength=10, scrollX=TRUE))
+  output$table_of_all_data <- DT::renderDataTable({View_All_Data_Func()},filter='top',rownames = FALSE,
+                                                  options=list(pageLength=10, scrollX=TRUE))
   output$download_all_data <- downloadHandler(
     filename = function() { paste("IN_Patent_Data_", Sys.Date(), ".csv", sep="") },
     content = function(file) {
@@ -60,5 +61,25 @@ shinyServer(function(input, output, session) {
   
   output$upload_status <- renderText({data_pull_msg()})
   output$upload_date <- renderText({as.character(data_last_update)})
+  
+  
+  #Treemap Chart
+  # Circular Vis Tab
+  Treemap_Func <- reactive({
+    Treemap_Vis(year_ranges = input$patent_year_range)
+  })
+  
+  output$tree_map <- renderPlot({
+    Treemap_Func()$vis
+  })
+  
+  
+  # observe({
+  #   updateSliderInput(session, "patent_year_range",
+  #                     min = min(Treemap_Vis()$data$year_granted), 
+  #                     max = max(Treemap_Vis()$data$year_granted))
+  #   
+  # })
+  
   
 })
