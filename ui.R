@@ -7,7 +7,8 @@ shinyUI(
         menuItem("Table View", tabName = "table_view", icon = icon("table")),
         menuItem("Network Vis", tabName = "network_vis", icon = icon("sitemap")),
         menuItem("Pull New Data", tabName = "pull_data", icon = icon("database")),
-        menuItem("Investors/Assignees", tabName="inv_assn", icon = icon("adjust"))
+        menuItem("Investors/Assignees", tabName="inv_assn", icon = icon("adjust")),
+        menuItem("CPC Industry Breakdown", tabName = "cpc_treemap", icon = icon("angle-double-down"))
       )
     ),
     dashboardBody(
@@ -94,6 +95,15 @@ shinyUI(
               plotOutput("polar_chart"),
               span(textOutput("inventor_text"), style="size:14"),
               span(textOutput("assignee_text"), style="size:14")
+            )
+          )
+        ),
+        tabItem(tabName ="cpc_treemap",
+          fluidRow(
+            column(12,
+                   sliderInput("patent_year_range", label = h3("Patent Year Range"), min = 1976, 
+                               max = 2017, value = c(1976, 2017), step = 1, sep = ""),
+                   plotOutput("tree_map") %>% withSpinner()
             )
           )
         )
