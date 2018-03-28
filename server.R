@@ -40,6 +40,21 @@ shinyServer(function(input, output, session) {
     }
   )
   
+  #Map tab
+  Map_Vis_Func <- reactive({
+    Map_Vis(selected_patent_years = input$map_select_patent_year)
+  })
+  
+  output$map_vis_plot <- renderLeaflet({Map_Vis_Func()$vis})
+  
+  output$map_data <- renderDataTable({Map_Vis_Func()$data},options=list(pageLength=10, scrollX=TRUE))
+  output$download_map_data <- downloadHandler(
+    filename = function() { paste("IN_Map_Data_", Sys.Date(), ".csv", sep="") },
+    content = function(file) {
+      write.csv({Map_Vis_Func()$data}, file, row.names=FALSE)
+    }
+  )
+  
   #Network Vis tab
   Network_Vis_Func <- reactive({
     Network_Vis(top_num = input$network_top_num, include = input$network_include)
@@ -51,7 +66,7 @@ shinyServer(function(input, output, session) {
   output$download_network_data <- downloadHandler(
     filename = function() { paste("IN_Network_Data_", Sys.Date(), ".csv", sep="") },
     content = function(file) {
-      write.csv({View_All_Data_Func()}, file)
+      write.csv({Network_Vis_Func()$data}, file)
     }
   )
   

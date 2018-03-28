@@ -12,10 +12,14 @@ library(magrittr)
 library(treemap)
 library(DT)
 library(shinycssloaders)
+library(leaflet)
+library(leaflet.extras)
+
 
 
 #source functions
 source("Func_View_All_Data.R")
+source("Func_Map_Vis.R")
 source("Func_Network_Vis.R")
 source("Func_Pull_Data.R")
 source("Func_Vis_Circular.R")
