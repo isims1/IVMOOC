@@ -11,6 +11,8 @@ library(scales)
 library(magrittr)
 library(treemap)
 library(DT)
+library(shinycssloaders)
+
 
 #source functions
 source("Func_View_All_Data.R")

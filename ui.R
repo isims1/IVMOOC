@@ -103,7 +103,7 @@ shinyUI(
             column(12,
                    sliderInput("patent_year_range", label = h3("Patent Year Range"), min = 1976, 
                                max = 2017, value = c(1976, 2017), step = 1, sep = ""),
-                   plotOutput("tree_map")
+                   plotOutput("tree_map") %>% withSpinner()
             )
           )
         )
