@@ -14,6 +14,7 @@ library(DT)
 library(shinycssloaders)
 library(leaflet)
 library(leaflet.extras)
+library(plotly)
 
 
 
@@ -24,6 +25,7 @@ source("Func_Network_Vis.R")
 source("Func_Pull_Data.R")
 source("Func_Vis_Circular.R")
 source("Func_CPC_Treemap_Vis.R")
+source("Func_CPC_Trends.R")
 
 #load data
 IN_patent_data_combined <- readRDS("IN_patent_data_combined.RDS")

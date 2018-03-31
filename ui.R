@@ -9,6 +9,7 @@ shinyUI(
         menuItem("Network Vis", tabName = "network_vis", icon = icon("sitemap")),
         menuItem("Investors/Assignees", tabName="inv_assn", icon = icon("adjust")),
         menuItem("CPC Industry Breakdown", tabName = "cpc_treemap", icon = icon("angle-double-down")),
+        menuItem("CPC Industry Trends", tabName = "cpc_trends", icon = icon("line-chart")),
         menuItem("Pull New Data", tabName = "pull_data", icon = icon("database"))
       )
     ),
@@ -123,6 +124,13 @@ shinyUI(
                    plotOutput("tree_map") %>% withSpinner()
             )
           )
+        ),
+        tabItem(tabName ="cpc_trends",
+                tabsetPanel(
+                  type='tabs',
+                  tabPanel("CPC Trends (Absolute)", plotlyOutput("cpc_absolute_trends") %>% withSpinner()),
+                  tabPanel("CPC Trends (Relative)", plotlyOutput("cpc_relative_trends") %>% withSpinner())
+                )
         ),
         tabItem(tabName = "pull_data",
           fluidRow(
