@@ -88,13 +88,14 @@ shinyServer(function(input, output, session) {
     Treemap_Func()$vis
   })
   
+  ##CPC Trends Tabs
+  output$cpc_absolute_trends <- renderPlotly({
+    CPC_Trend_Vis(type = 'absolute')$vis
+  })
   
-  # observe({
-  #   updateSliderInput(session, "patent_year_range",
-  #                     min = min(Treemap_Vis()$data$year_granted), 
-  #                     max = max(Treemap_Vis()$data$year_granted))
-  #   
-  # })
+  output$cpc_relative_trends <- renderPlotly({
+    CPC_Trend_Vis(type = 'relative')$vis
+  })
   
   
 })
