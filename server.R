@@ -1,30 +1,30 @@
 shinyServer(function(input, output, session) {
   
-  # Circular Vis Tab
-  Circular_Vis_Func <- reactive({
-    Circular_Vis(select_year = input$patent_year, select_section = input$category)
-  })
-  
-  output$polar_chart <- renderPlot({
-    Circular_Vis_Func()$vis
-  })
-  
-  output$inventor_text <- renderText({
-    paste("Number of Inventors: ", Circular_Vis_Func()$selected$inv_count)
-  })
-  
-  output$assignee_text <- renderText({
-    paste("Number of Assignees: ", Circular_Vis_Func()$selected$assn_count)
-  })
-  
-  observe({
-    updateSliderInput(session, "patent_year",
-      min = min(Circular_Vis_Func()$data$year_granted), 
-      max = max(Circular_Vis_Func()$data$year_granted))
-  
-    updateSelectInput(session, "category",
-      choices = Circular_Vis_Func()$data$cpc_section_title)
-  })
+  # # Circular Vis Tab
+  # Circular_Vis_Func <- reactive({
+  #   Circular_Vis(select_year = input$patent_year, select_section = input$category)
+  # })
+  # 
+  # output$polar_chart <- renderPlot({
+  #   Circular_Vis_Func()$vis
+  # })
+  # 
+  # output$inventor_text <- renderText({
+  #   paste("Number of Inventors: ", Circular_Vis_Func()$selected$inv_count)
+  # })
+  # 
+  # output$assignee_text <- renderText({
+  #   paste("Number of Assignees: ", Circular_Vis_Func()$selected$assn_count)
+  # })
+  # 
+  # observe({
+  #   updateSliderInput(session, "patent_year",
+  #     min = min(Circular_Vis_Func()$data$year_granted), 
+  #     max = max(Circular_Vis_Func()$data$year_granted))
+  # 
+  #   updateSelectInput(session, "category",
+  #     choices = Circular_Vis_Func()$data$cpc_section_title)
+  # })
   
   #View all data tab
   View_All_Data_Func <- reactive({
@@ -79,7 +79,6 @@ shinyServer(function(input, output, session) {
   
   
   #Treemap Chart
-  # Circular Vis Tab
   Treemap_Func <- reactive({
     Treemap_Vis(year_ranges = input$patent_year_range)
   })
@@ -93,9 +92,7 @@ shinyServer(function(input, output, session) {
     CPC_Trend_Vis(type = 'absolute')$vis
   })
   
-  output$cpc_relative_trends <- renderPlotly({
-    CPC_Trend_Vis(type = 'relative')$vis
-  })
-  
-  
+  # output$cpc_relative_trends <- renderPlotly({
+  #   CPC_Trend_Vis(type = 'relative')$vis
+  # })
 })
