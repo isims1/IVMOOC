@@ -26,7 +26,7 @@ shinyUI(
               )
             )
           ),
-          dataTableOutput("table_of_all_data"),
+          dataTableOutput("table_of_all_data") %>% withSpinner(),
           br(),
           div(style="float:right", downloadButton("download_all_data", "Download Data")),
           br()
@@ -54,11 +54,11 @@ shinyUI(
           br(),
           conditionalPanel(
             condition = "input.map_plot_or_data=='map_pickedPlot'",
-            leafletOutput("map_vis_plot", width = "100%", height = "700px")
+            leafletOutput("map_vis_plot", width = "100%", height = "700px") %>% withSpinner()
           ),
           conditionalPanel(
             condition = "input.map_plot_or_data=='map_pickedData'",
-            dataTableOutput("map_data"),
+            dataTableOutput("map_data") %>% withSpinner(),
             br(),
             div(style="float:right", downloadButton("download_map_data", "Download Data")),
             br()
@@ -93,11 +93,11 @@ shinyUI(
           br(),
           conditionalPanel(
             condition = "input.network_plot_or_data=='network_pickedPlot'",
-            visNetworkOutput("network_vis_plot", width = "100%", height = "700px")
+            visNetworkOutput("network_vis_plot", width = "100%", height = "700px") %>% withSpinner()
           ),
           conditionalPanel(
             condition = "input.network_plot_or_data=='network_pickedData'",
-            dataTableOutput("network_data"),
+            dataTableOutput("network_data") %>% withSpinner(),
             br(),
             div(style="float:right", downloadButton("download_network_data", "Download Data")),
             br()
@@ -139,7 +139,7 @@ shinyUI(
                actionButton("pull_new_data", "Update Data"),
                br(),
                br(),
-               textOutput("upload_status"),
+               textOutput("upload_status") %>% withSpinner(),
                br(),
                helpText("Last time data was updated:"),
                textOutput("upload_date"),
