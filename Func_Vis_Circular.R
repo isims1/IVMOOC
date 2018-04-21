@@ -1,5 +1,5 @@
-Circular_Vis <- function(combined = IN_patent_data_combined, select_year, select_section){
-
+Circular_Vis_Data <- function(combined = IN_patent_data_combined){
+  
   patents.data <- data.table(combined)
   
   patents.data[cpc_section_id == "A", cpc_section_title := "Human Necessities"]
@@ -18,12 +18,17 @@ Circular_Vis <- function(combined = IN_patent_data_combined, select_year, select
     group_by(year_granted, cpc_section_title) %>%
     summarise(inv_count = n_distinct(inventor_id),
               assn_count = n_distinct(assignee_id))
+  
+  return(grouped)
+}
+
+Circular_Vis <- function(grouped = IN_circular_vis_data, select_year, select_section){
 
   selected <- grouped %>%
     filter(year_granted == select_year, cpc_section_title == select_section)
 
-  inv = ifelse(dim(selected[1] == 0), 0, selected$inv_count)
-  assn = ifelse(dim(selected[1] == 0), 0, selected$assn_count)
+  inv = ifelse((nrow(selected) == 0), 0, selected$inv_count)
+  assn = ifelse((nrow(selected) == 0), 0, selected$assn_count)
   
   plot.dt <- data.table(x = c(1, 2),
     category = c("Inventors", "Assignees"),
@@ -39,8 +44,9 @@ Circular_Vis <- function(combined = IN_patent_data_combined, select_year, select
     theme_void() +
     labs(fill = 'CPC Category', y = 'Number')
 
-  output_list <- list(data = grouped, vis=circle.plot, selected = selected) 
+  output_list <- list(vis = circle.plot, data = selected) 
 
   return(output_list)
   
 }
+

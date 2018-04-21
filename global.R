@@ -15,8 +15,7 @@ library(shinycssloaders)
 library(leaflet)
 library(leaflet.extras)
 library(plotly)
-
-
+library(forcats)
 
 #source functions
 source("Func_View_All_Data.R")
@@ -30,4 +29,5 @@ source("Func_CPC_Trends.R")
 #load data
 IN_patent_data_combined <- readRDS("IN_patent_data_combined.RDS")
 IN_patent_data_unnested <- readRDS("IN_patent_data_unnested.RDS")
+IN_circular_vis_data <- Circular_Vis_Data()
 data_last_update <- readRDS("Last_Data_Update_Date.RDS")

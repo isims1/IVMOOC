@@ -7,9 +7,9 @@ shinyUI(
         menuItem("Table View", tabName = "table_view", icon = icon("table")),
         menuItem("Map Vis", tabName = "map_vis", icon = icon("map")),
         menuItem("Network Vis", tabName = "network_vis", icon = icon("sitemap")),
-        #menuItem("Investors/Assignees", tabName="inv_assn", icon = icon("adjust")),
         menuItem("CPC Industry Breakdown", tabName = "cpc_treemap", icon = icon("angle-double-down")),
         menuItem("CPC Industry Trends", tabName = "cpc_trends", icon = icon("line-chart")),
+        menuItem("Investors/Assignees", tabName="inv_assn", icon = icon("adjust")),
         menuItem("Pull New Data", tabName = "pull_data", icon = icon("database"))
       )
     ),
@@ -103,34 +103,135 @@ shinyUI(
             br()
           )
         ),
-        # tabItem(tabName ="inv_assn",
-        #   fluidRow(
-        #     column(12,
-        #       sliderInput("patent_year", "Year", min = 1976,
-        #         max = 2017, value = 2017, sep = "", step = 1),
-        #       selectInput("category", "Patent Category",
-        #         choices = c("Other"), selected="Other"),
-        #       plotOutput("polar_chart"),
-        #       span(textOutput("inventor_text"), style="size:14"),
-        #       span(textOutput("assignee_text"), style="size:14")
-        #     )
-        #   )
-        # ),
         tabItem(tabName ="cpc_treemap",
           fluidRow(
-            column(12,
-                   sliderInput("patent_year_range", label = h3("Patent Year Range"), min = 1976, 
-                               max = 2017, value = c(1976, 2017), step = 1, sep = ""),
-                   plotOutput("tree_map", height = "700px") %>% withSpinner()
+            column(6,
+                   sliderInput("patent_year_range", 
+                               label = h3("Patent Year Range"), 
+                               min = min(IN_patent_data_combined$patent_year), 
+                               max = max(IN_patent_data_combined$patent_year), 
+                               value = c(min(IN_patent_data_combined$patent_year), max(IN_patent_data_combined$patent_year)), step = 1, sep = "")
+            ),
+            column(3,
+                   radioButtons("treemap_plot_or_data", "Plot or Data",
+                                c("Plot" = "treemap_pickedPlot", "Data" = "treemap_pickedData" ),
+                                selected = "treemap_pickedPlot",
+                                inline = T
+                   )
             )
+          ),
+          br(),
+          conditionalPanel(
+            condition = "input.treemap_plot_or_data=='treemap_pickedPlot'",
+            plotOutput("tree_map", height = "700px") %>% withSpinner()
+          ),
+          conditionalPanel(
+            condition = "input.treemap_plot_or_data=='treemap_pickedData'",
+            dataTableOutput("treemap_data") %>% withSpinner(),
+            br(),
+            div(style="float:right", downloadButton("download_treemap_data", "Download Data")),
+            br()
           )
         ),
         tabItem(tabName ="cpc_trends",
                 tabsetPanel(
                   type='tabs',
-                  tabPanel("CPC Trends (Absolute)", plotlyOutput("cpc_absolute_trends", height = "700px") %>% withSpinner())#,
-                  #tabPanel("CPC Trends (Relative)", plotlyOutput("cpc_relative_trends") %>% withSpinner())
+                  tabPanel("CPC Trends (Absolute)", 
+                             br(),
+                             fluidRow(
+                               column(3,
+                                      radioButtons("cpc_trends1_plot_or_data", "Plot or Data",
+                                                   c("Plot" = "cpc_trends1_pickedPlot", "Data" = "cpc_trends1_pickedData" ),
+                                                   selected = "cpc_trends1_pickedPlot",
+                                                   inline = T
+                                      )
+                               )
+                             ),
+                             br(),
+                             conditionalPanel(
+                               condition = "input.cpc_trends1_plot_or_data=='cpc_trends1_pickedPlot'",
+                               plotlyOutput("cpc_absolute_trends", height = "700px") %>% withSpinner()
+                             ),
+                             conditionalPanel(
+                               condition = "input.cpc_trends1_plot_or_data=='cpc_trends1_pickedData'",
+                               dataTableOutput("cpc_trends1_data") %>% withSpinner(),
+                               br(),
+                               div(style="float:right", downloadButton("download_cpc_trends1_data", "Download Data")),
+                               br()
+                             )
+                  ),
+                  tabPanel("CPC Trends (Relative)", 
+                           br(),
+                           fluidRow(
+                             column(3,
+                                    radioButtons("cpc_trends2_plot_or_data", "Plot or Data",
+                                                 c("Plot" = "cpc_trends2_pickedPlot", "Data" = "cpc_trends2_pickedData" ),
+                                                 selected = "cpc_trends2_pickedPlot",
+                                                 inline = T
+                                    )
+                             )
+                           ),
+                           br(),
+                           conditionalPanel(
+                             condition = "input.cpc_trends2_plot_or_data=='cpc_trends2_pickedPlot'",
+                             plotlyOutput("cpc_relative_trends", height = "700px") %>% withSpinner()
+                           ),
+                           conditionalPanel(
+                             condition = "input.cpc_trends2_plot_or_data=='cpc_trends2_pickedData'",
+                             dataTableOutput("cpc_trends2_data") %>% withSpinner(),
+                             br(),
+                             div(style="float:right", downloadButton("download_cpc_trends2_data", "Download Data")),
+                             br()
+                           )
+                  )
                 )
+        ),
+        tabItem(tabName ="inv_assn",
+                fluidRow(
+                  column(3,
+                         sliderInput("patent_year", "Year", min = min(IN_circular_vis_data$year_granted),
+                                     max = max(IN_circular_vis_data$year_granted), value = max(IN_circular_vis_data$year_granted), sep = "", step = 1)
+                  ),
+                  column(3,
+                         selectInput("category", "Patent Category",
+                                     choices = unique(IN_circular_vis_data$cpc_section_title), 
+                                     selected=unique(IN_circular_vis_data$cpc_section_title)[1])
+                  ),
+                  column(3,
+                         span(textOutput("inventor_text"), style="size:14"),
+                         span(textOutput("assignee_text"), style="size:14")
+                  ),
+                  column(3,
+                         radioButtons("circular_plot_or_data", "Plot or Data",
+                                      c("Plot" = "circular_pickedPlot", "Data" = "circular_pickedData" ),
+                                      selected = "circular_pickedPlot",
+                                      inline = T
+                         )
+                  )
+                ),
+                br(),
+                conditionalPanel(
+                  condition = "input.circular_plot_or_data=='circular_pickedPlot'",
+                  plotOutput("polar_chart") %>% withSpinner()
+                ),
+                conditionalPanel(
+                  condition = "input.circular_plot_or_data=='circular_pickedData'",
+                  dataTableOutput("circular_data") %>% withSpinner(),
+                  br(),
+                  div(style="float:right", downloadButton("download_circular_data", "Download Data")),
+                  br()
+                )
+                # fluidRow(
+                #   column(12,
+                #          sliderInput("patent_year", "Year", min = 1976,
+                #                      max = 2017, value = 2017, sep = "", step = 1),
+                #          selectInput("category", "Patent Category",
+                #                      choices = c("Other"), selected="Other"),
+                #          plotOutput("polar_chart"),
+                #          span(textOutput("inventor_text"), style="size:14"),
+                #          span(textOutput("assignee_text"), style="size:14")
+                #   )
+                # )
         ),
         tabItem(tabName = "pull_data",
           fluidRow(
