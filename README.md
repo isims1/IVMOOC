@@ -13,26 +13,46 @@ This R/Shiny dashboard can be viewed in two ways:
    in the following links:
 
    A. Installing RStudio: https://www.rstudio.com/products/rstudio/download/
+   
    B. Cloning a Git repository: https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN
+   
    C. The following packages will need to be installed to run the application. Instructions on installing packages can be found at 
       http://web.cs.ucla.edu/~gulzar/rstudio/
       
-      # Required packages:
+      ## Required packages:
+      
       shiny
+      
       data.table
+      
       ggplot2
+      
       dplyr
+      
       patentsview
+      
       purrr
+      
       visNetwork
+      
       shinydashboard
+      
       stringr
+      
       scales
+      
       magrittr
+      
       treemap
+      
       DT
+      
       shinycssloaders
+      
       leaflet
+      
       leaflet.extras
+      
       plotly
+      
       forcats
