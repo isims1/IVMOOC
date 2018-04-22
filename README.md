@@ -19,7 +19,7 @@ This R/Shiny dashboard can be viewed in two ways:
    C. The following packages will need to be installed to run the application. Instructions on installing packages can be found at 
       http://web.cs.ucla.edu/~gulzar/rstudio/
       
-      ## Required packages:
+      ## Required packages
       
       shiny
       
